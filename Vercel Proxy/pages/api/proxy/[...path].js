@@ -23,7 +23,6 @@ export default async function handler(req, res) {
     let targetUrl;
     try {
       targetUrl = new URL(url);
-      // Only allow http and https protocols
       if (!['http:', 'https:'].includes(targetUrl.protocol)) {
         throw new Error('Only HTTP/HTTPS protocols are allowed');
       }
@@ -35,13 +34,13 @@ export default async function handler(req, res) {
     const fetchOptions = {
       method: req.method,
       headers: {
-        'User-Agent': 'Vercel-Proxy/1.0',
+        'User-Agent': 'Vercel-Proxy/1.0', // ← FIXED: No spaces
         'Accept': req.headers.accept || '*/*',
       },
     };
 
     // Forward relevant headers
-    const forwardHeaders = ['content-type', 'authorization', 'x-api-key'];
+    const forwardHeaders = ['content-type', 'authorization', 'x-api-key', 'x-forwarded-for'];
     forwardHeaders.forEach(header => {
       if (req.headers[header]) {
         fetchOptions.headers[header] = req.headers[header];
@@ -51,6 +50,7 @@ export default async function handler(req, res) {
     // Handle request body for non-GET requests
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       const contentType = req.headers['content-type'] || '';
+      
       if (contentType.includes('application/json')) {
         fetchOptions.body = JSON.stringify(req.body);
         fetchOptions.headers['Content-Type'] = 'application/json';
@@ -58,13 +58,15 @@ export default async function handler(req, res) {
         fetchOptions.body = new URLSearchParams(req.body).toString();
         fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       } else if (contentType.includes('multipart/form-data')) {
-        // For multipart, we need to handle differently
-        const formData = new FormData();
-        Object.keys(req.body).forEach(key => {
-          formData.append(key, req.body[key]);
-        });
-        fetchOptions.body = formData;
-      } else {
+        // For multipart, handle differently
+        if (req.body && typeof req.body === 'object') {
+          const formData = new FormData();
+          Object.keys(req.body).forEach(key => {
+            formData.append(key, req.body[key]);
+          });
+          fetchOptions.body = formData;
+        }
+      } else if (req.body) {
         fetchOptions.body = req.body;
       }
     }
@@ -115,7 +117,6 @@ export default async function handler(req, res) {
   }
 }
 
-// Disable body parser for this route to handle raw requests
 export const config = {
   api: {
     bodyParser: {
