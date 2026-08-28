@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "pages/api/proxy/[...path].js": {
+      "maxDuration": 10,
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/proxy/(.*)",
+      "destination": "/api/proxy/$1"
+    }
+  ]
+}
