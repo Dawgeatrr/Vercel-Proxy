@@ -16,7 +16,7 @@ A general-purpose web proxy that runs on Vercel serverless functions. Bypass COR
 
 ### 1. Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/vercel-proxy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Dawgeatrr/vercel-proxy)
 
 ### 2. Manual Deployment
 
